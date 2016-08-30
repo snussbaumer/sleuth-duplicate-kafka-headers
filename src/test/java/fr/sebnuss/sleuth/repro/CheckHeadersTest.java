@@ -40,22 +40,15 @@ public class CheckHeadersTest {
         ResponseEntity<String> result = restTemplate.exchange("http://localhost:8080/env", HttpMethod.GET, null,
                 String.class);
         log.info(result.getBody());
-        // should be equal to 6 in reality (X-B3-* headers are repeated three times already)
-        assertThat(StringUtils.countMatches(result.getBody(), "spring.cloud.stream.kafka.binder.headers"))
-                .isEqualTo(18);
-        result = restTemplate.exchange("http://localhost:8080/refresh", HttpMethod.POST, null, String.class);
-        // should be zero (refresh returns the number of parameters that changed)
         assertThat(StringUtils.countMatches(result.getBody(), "spring.cloud.stream.kafka.binder.headers")).isEqualTo(6);
-        // we have now 24 spring.cloud.stream.kafka.binder.headers instead of 18. Should be 6 overall
+        result = restTemplate.exchange("http://localhost:8080/refresh", HttpMethod.POST, null, String.class);
+        assertThat(StringUtils.countMatches(result.getBody(), "spring.cloud.stream.kafka.binder.headers")).isEqualTo(0);
         result = restTemplate.exchange("http://localhost:8080/env", HttpMethod.GET, null, String.class);
-        assertThat(StringUtils.countMatches(result.getBody(), "spring.cloud.stream.kafka.binder.headers"))
-                .isEqualTo(24);
+        assertThat(StringUtils.countMatches(result.getBody(), "spring.cloud.stream.kafka.binder.headers")).isEqualTo(6);
     }
 
     @SpringCloudApplication
     public static class TestApplication {
-
-        private static Logger log = LoggerFactory.getLogger(TestApplication.class);
 
         public static void main(String... args) {
             SpringApplication.run(TestApplication.class, args);
